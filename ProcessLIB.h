@@ -1,19 +1,11 @@
-/*
-#include <vector>
+#include <iostream>
 #include <cmath>
+#include <vector>
 #include <cstring>
-*/
-/** CLASS - PVector
- * A class to describe a two or three dimensional vector. 
- * The result of all functions are applied to the vector itself, with the 
- * exception of cross(), which returns a new PVector (or writes to a specified 
- * 'target' PVector). That is, add() will add the contents of one vector to 
- * this one. Using add() with additional parameters allows you to put the 
- * result into a new PVector. Functions that act on multiple vectors also 
- * include static versions. Because creating new objects can be computationally 
- * expensive, most functions include an optional 'target' PVector, so that a 
- * new PVector object is not created with each operation. 
- */ 
+#include <cmath>
+#include <bits/stdc++.h>
+using namespace std;
+
 class PVector {  
 
     // The x component of the vector. 
@@ -52,7 +44,7 @@ public:
             x = source[0]; 
             y = source[1]; 
         } 
-        if (source.length >= 3) { 
+        if (source.size()>= 3) { 
             z = source[2]; 
         } 
     } 
@@ -62,25 +54,31 @@ public:
     } 
  
  
-    vector<float>* get(vector<float> target) { //Returning an array form of the vector
-        if (target == NULL) { 
+    vector<float>* get(vector<float> &target) { //Returning an array form of the vector
+        if (&target == NULL) { 
             return new vector<float> { x, y, z }; 
         } 
-        if (target.length >= 2) { 
+        if (target.size() >= 2) { 
             target[0] = x; 
             target[1] = y; 
         } 
-        if (target.length >= 3) { 
+        if (target.size() >= 3) { 
             target[2] = z; 
         } 
-        return target; 
+        return &target; 
     } 
 
     float mag() { //returns the magnitude of the vector
         return (float) sqrt(x*x + y*y + z*z); 
     } 
  
- 
+    void setMag(float m){
+        float cmag = this->mag();
+        x*= m/cmag;
+        y*= m/cmag;
+        z*= m/cmag;
+    }
+
     void add(PVector v) { 
         x += v.getx(); 
         y += v.gety(); 
@@ -127,7 +125,8 @@ public:
         z -= z_; 
     } 
     //Return the difference of two vectors
-    static   PVector sub(PVector v1, PVector v2, PVector target = PVector(0, 0)){ 
+    PVector sub(PVector v1, PVector v2){ 
+         PVector target;
          target.set(v1.getx()-v2.getx(), v1.gety()-v2.gety(), v1.getz()-v2.getz());
          return target;
     } 
@@ -305,11 +304,39 @@ public:
     if (array == null) { 
       array = new float[3]; 
     } 
-    array[0] = x; 
-    array[1] = y; 
+    array[0] = x;  
     array[2] = z; 
     return array; 
   } 
 }
 */
 };
+
+class BasisVector:public PVector{
+protected:  
+    PVector up, forward, side;//such that side = fwdXUp
+public :
+    BasisVector(){}
+    BasisVector(PVector fwd, PVector Up);
+     void update(PVector fwd);
+};
+
+BasisVector::BasisVector(PVector fwd, PVector Up){
+    forward = fwd;
+    up = Up; 
+    side = forward.cross(up);
+}
+
+void BasisVector::update(PVector fwd){
+    PVector f = fwd;
+    f.normalize();
+    PVector upapprox = up;
+    forward = f;
+    side = f.cross(upapprox);
+    up  = side.cross(forward);
+
+}
+
+void mapx(float &y, float ymax, float ymin, float xatymax, float xatymin, float xcurr){
+    y = ymax + (xcurr - xatymax)*(ymax-ymin)/(xatymax-xatymin);
+}

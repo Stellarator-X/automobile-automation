@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "/usr/include/xtensor"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"vector": "cpp",
+			"cmath": "cpp",
+			"string.h": "c",
+			"iostream": "cpp",
+			"iosfwd": "cpp",
+			"*.tcc": "cpp"
+		}
+	}
+}

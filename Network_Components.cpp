@@ -29,29 +29,43 @@
 
 
 
-//Network - Virtual
-    class neural_net{
-        layer *input_layer;
-        layer *output_layer;
-        vector<vector<float>> del;//2D as everyu neuron has a unique del
 
-        string netDirectory;
-        int depth;
+//Neuron  - Virtual
+    class neuron{
+        int n_inputs;
+        float z;//weighted_input_stream;
+        vector<float> weights;
+        vector<float> inputStream;
+        float bias;
+        float current_del;
+        vector<float> d;
+
+        //layer *thisLayer;
     public:
-        neural_net(int n, vector<int> layerSizes, string s);//Constructor with layer-depth
+        neuron(int n);//Constructor
+        float getZ(vector<float> input);
+        vector<float> getWeights(){
+            return weights;
+        }
+        float getOutput(vector<float> input);
+        void setWeight(int i, float n){
+            assert(weights.size()>i+1);
+            weights[i] = n;
+        }
+        void setWeights(vector<float> w){
+            weights = w;
+        }
+        float getDel(){
+            return current_del;
+        }
 
-        vector<float> getOutput(vector<float> input);
-        void calc_del(vector<float> input, vector<float> output);
-        vector<vector<float>> getDel();
-        void stoch_learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs);
-        layer *getLayerNo(int x);
-        void learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs);
-        float getCost(vector<vector<float>> inputs, vector<vector<float>> outputs);
-
-        void setLearnedWeights();//Virtual
-
+        vector<float> getInputs(){
+            return inputStream;
+        }
+        void setDel(float x){
+            current_del=x;
+        }
     };
-
 //Layer - Virtual
  class layer{
         vector<neuron> neurons;
@@ -91,42 +105,29 @@
         vector<float> getDel(vector<float> delnxt);
         void setWeights(vector<vector<float>> ww);
     };
-//Neuron  - Virtual
-    class neuron{
-        int n_inputs;
-        float z;//weighted_input_stream;
-        vector<float> weights;
-        vector<float> inputStream;
-        float bias;
-        float current_del;
-        vector<float> d;
+//Network - Virtual
+    class neural_net{
+        layer *input_layer;
+        layer *output_layer;
+        vector<vector<float>> del;//2D as everyu neuron has a unique del
 
-        layer *thisLayer;
+        string netDirectory;
+        int depth;
     public:
-        neuron(int n, layer *l);//Constructor
-        float getZ(vector<float> input);
-        vector<float> getWeights(){
-            return weights;
-        }
-        float getOutput(vector<float> input);
-        void setWeight(int i, float n){
-            assert(weights.size()>i+1);
-            weights[i] = n;
-        }
-        void setWeights(vector<float> w){
-            weights = w;
-        }
-        float getDel(){
-            return current_del;
-        }
+        neural_net(int n, vector<int> layerSizes, string s);//Constructor with layer-depth
 
-        vector<float> getInputs(){
-            return inputStream;
-        }
-        void setDel(float x){
-            current_del=x;
-        }
+        vector<float> getOutput(vector<float> input);
+        void calc_del(vector<float> input, vector<float> output);
+        vector<vector<float>> getDel();
+        void stoch_learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs);
+        layer *getLayerNo(int x);
+        void learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs);
+        float getCost(vector<vector<float>> inputs, vector<vector<float>> outputs);
+
+        void setLearnedWeights();//Virtual
+
     };
+
 //Network - Function defs
     neural_net::neural_net(int n, vector<int> layerSizes, string s){//n-> no of layers, layerSizes
         depth = n;
@@ -158,7 +159,7 @@
     layer::layer(int n){      //}, neural_net *N){            
         size = n;
         for(int i=0;i<n;i++){
-            neurons.push_back(neuron(n+1, this));
+            neurons.push_back(neuron(n+1));
         }
      //   thisNetwork = N;
         next = NULL;
@@ -219,12 +220,12 @@
     }
 
 //Neuron - Function defs
-    neuron::neuron(int n, layer *l){
+    neuron::neuron(int n){
         n_inputs = n;
         for(int i=0;i<n;i++)
             weights.push_back(rand()%2+0.4);
         bias = rand()%2+0.4;
-        thisLayer = l;
+        //thisLayer = l;
     }
 
     float neuron::getOutput(vector<float> input){
@@ -403,9 +404,9 @@
             for(int j=0;j<lcur->getNeurons().size();j++){
                 n_weights.push_back(lcur->getNeurons()[j].getWeights());
             }
-            char *name = "Layer";
-            name[5] = i;    //Assuming depth <= 10 
-            name[6] = '\0';
+            string name = "Layer";
+            name+= (i+'0');    //Assuming depth <= 10 
+            //name[6] = '\0';
             modify_csv_file(name, n_weights);
         }
     }

@@ -578,9 +578,12 @@ void Dijkstra::printsolution(){
 
     template<class T>
     vector<T> vector_add(vector<T> A, vector<T> B){
-        assert(A.size() = B.size());
+        assert(A.size() == B.size());
         vector<T> result;
-        for((T a, T b):(A, B)){
+        for(auto const &i : combine(A, B)){
+            T a;
+            T b;
+            boost::tie(a, b) = i;
             result.push_back(a+b);
         }
         return result;
@@ -592,7 +595,7 @@ void Dijkstra::printsolution(){
         assert(A.size()==B.size());
         size_t n = A.size();
         for(size_t i=0;i<n;i++){
-            assert(A[i].size==B[i].size());
+            assert(A[i].size()==B[i].size());
                 result.push_back(vector_add(A[i], B[i]));
         }
     }
@@ -601,7 +604,7 @@ void Dijkstra::printsolution(){
     vector<vector<T>> convert_to_2d(vector<T> vect){
         vector<vector<T>> result;
         result.push_back(vect);
-        return vect;
+        return result;
     }
 
     template<class T, class t>

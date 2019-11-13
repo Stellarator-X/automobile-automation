@@ -132,6 +132,10 @@
         void learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs);
         float getCost(vector<vector<float>> inputs, vector<vector<float>> outputs);
 
+        layer* getInputLayer(){
+            return input_layer;
+        }
+
         void setLearnedWeights();//Virtual
 
     };
@@ -143,10 +147,11 @@
         int it = 0;//iterator through layerSizes
         input_layer = new layer(layerSizes[it++]);//, this);
         layer *current = input_layer;
-        while(current->getSize()!=1){
+        while(it<n-1){
             current->setNext(new layer(layerSizes[it++]));  //, this));
             current->getNext()->setPrev(current);
             current = current->getNext();
+            it++;
         }
         output_layer = current;
         netDirectory = s;
@@ -161,95 +166,7 @@
         return curr;
     }
 
-
-
-//Layer - Function defs
-    layer::layer(int n){      //}, neural_net *N){
-        size = n;
-        for(int i=0;i<n;i++){
-            neurons.push_back(neuron(n+1));
-        }
-     //   thisNetwork = N;
-        next = NULL;
-        prev = NULL;
-       // thisNetwork = N;
-    }
-
-    void layer::setWeights(vector<vector<float>> ww){
-        for(int i=0;i<size;i++)
-            neurons[i].setWeights(ww[i]);
-    }
-
-    vector<vector<float>> layer::getWeightMatrix(){
-        vector<vector<float>> result;
-        for(int i=0;i<size;i++){
-            result.push_back(neurons[i].getWeights());        }
-        return result;
-    }
-
-    vector<float> layer::returnDel(){
-        vector<float> result;
-        for(neuron n:neurons){
-            result.push_back(n.getDel());
-        }
-        return result;
-    }
-
-    vector<float> layer::getDel(vector<float> delnxt){
-        assert(this->getNext()!=NULL);
-        vector<vector<float>> result;
-        vector<vector<float>> dellp1 = convert_to_2d(delnxt);
-        vector<vector<float>> wlp1T = Transpose(next->getWeightMatrix());
-        vector<vector<float>> dphi = convert_to_2d(d_phi(giveZ()));
-        //result = {w(l+1).T X del(l+1)}.h.d_phi(z(l))
-        result = matrixmult_hamadard(matrixmult(wlp1T, dellp1),dphi);
-        assert(result.size()==1);
-        vector<float> thisdel = result[0];
-        for(int i=0;i<size;i++){
-            neurons[i].setDel(thisdel[i]);
-        }
-        return thisdel;
-    }
-
-    vector<float> layer::getOutput(vector<float> input){
-        vector<float> temp;
-        for(int i=0;i<size;i++){
-            temp.push_back(neurons[i].getOutput(input));
-        }
-        return temp;
-    }
-
-    vector<float> layer::getZ(vector<float> input){
-        vector<float> result;
-        for(int i=0;i<size;i++)
-            result.push_back(neurons[i].getZ(input));
-        Z = result;
-        return result;
-    }
-
-//Neuron - Function defs
-    neuron::neuron(int n){
-        n_inputs = n;
-        for(int i=0;i<n;i++)
-            weights.push_back(rand()%2+0.4);
-        bias = rand()%2+0.4;
-        //thisLayer = l;
-    }
-
-    float neuron::getOutput(vector<float> input){
-        return phi(getZ(input));
-    }
-    float neuron::getZ(vector<float> input){
-        inputStream = input;
-        float result = bias;
-
-        for(int i=0;i<n_inputs;i++)
-            result += weights[i]*input[i];
-        z = result;
-        return result;
-    }
-
-        vector<vector<float>> neural_net::getDel(){
+     vector<vector<float>> neural_net::getDel(){
         vector<vector<float>> result;
         layer *curr = input_layer;
         while(curr!=NULL){
@@ -434,3 +351,94 @@
             weightsofl.clear();
         }
     }
+
+
+
+
+//Layer - Function defs
+    layer::layer(int n){      //}, neural_net *N){
+        size = n;
+        for(int i=0;i<n;i++){
+            neurons.push_back(neuron(n+1));
+        }
+     //   thisNetwork = N;
+        next = NULL;
+        prev = NULL;
+       // thisNetwork = N;
+    }
+
+    void layer::setWeights(vector<vector<float>> ww){
+        for(int i=0;i<size;i++)
+            neurons[i].setWeights(ww[i]);
+    }
+
+    vector<vector<float>> layer::getWeightMatrix(){
+        vector<vector<float>> result;
+        for(int i=0;i<size;i++){
+            result.push_back(neurons[i].getWeights());        }
+        return result;
+    }
+
+    vector<float> layer::returnDel(){
+        vector<float> result;
+        for(neuron n:neurons){
+            result.push_back(n.getDel());
+        }
+        return result;
+    }
+
+    vector<float> layer::getDel(vector<float> delnxt){
+        assert(this->getNext()!=NULL);
+        vector<vector<float>> result;
+        vector<vector<float>> dellp1 = convert_to_2d(delnxt);
+        vector<vector<float>> wlp1T = Transpose(next->getWeightMatrix());
+        vector<vector<float>> dphi = convert_to_2d(d_phi(giveZ()));
+        //result = {w(l+1).T X del(l+1)}.h.d_phi(z(l))
+        result = matrixmult_hamadard(matrixmult(wlp1T, dellp1),dphi);
+        assert(result.size()==1);
+        vector<float> thisdel = result[0];
+        for(int i=0;i<size;i++){
+            neurons[i].setDel(thisdel[i]);
+        }
+        return thisdel;
+    }
+
+    vector<float> layer::getOutput(vector<float> input){
+        vector<float> temp;
+        for(int i=0;i<size;i++){
+            temp.push_back(neurons[i].getOutput(input));
+        }
+        return temp;
+    }
+
+    vector<float> layer::getZ(vector<float> input){
+        vector<float> result;
+        for(int i=0;i<size;i++)
+            result.push_back(neurons[i].getZ(input));
+        Z = result;
+        return result;
+    }
+
+//Neuron - Function defs
+    neuron::neuron(int n){
+        n_inputs = n;
+        for(int i=0;i<n;i++)
+            weights.push_back(rand()%2+0.4);
+        bias = rand()%2+0.4;
+        //thisLayer = l;
+    }
+
+    float neuron::getOutput(vector<float> input){
+        return phi(getZ(input));
+    }
+    float neuron::getZ(vector<float> input){
+        inputStream = input;
+        float result = bias;
+
+        for(int i=0;i<n_inputs;i++)
+            result += weights[i]*input[i];
+        z = result;
+        return result;
+    }
+
+   

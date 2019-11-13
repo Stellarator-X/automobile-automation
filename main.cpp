@@ -11,6 +11,8 @@ using namespace std;
 
 #include "Objects.cpp"
 #include "perceptron2.cpp"
+#include "FH.h"
+#include "Network_Components.cpp"
 //Test for path following (Between Waypoints)
 int PathFollowing(){
     path rasta(10.0,100);
@@ -66,6 +68,18 @@ int dijkstr(){
     return 0;
 }
 
+int testNN(){
+	int n=3;
+	vector<int> lsizes;// = 3;
+	for(int i=0; i<n;i++)
+		lsizes.push_back(20*(i+1));
+	neural_net Brain(n, lsizes, "Net1");
+
+    layer *L = Brain.getInputLayer();
+    modify_csv_file("NE.csv", L->getWeightMatrix());
+	return 0;
+}
+
 int testla(){
     vector<int> d = {1, 2, 3, 4};
     vector<vector<int>> a = {d};
@@ -84,5 +98,6 @@ int testla(){
 }
 
 int main(){
-    return testla();   
+//    return testla(); 
+	return testNN();  
 }

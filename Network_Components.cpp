@@ -151,7 +151,6 @@
             current->setNext(new layer(layerSizes[it++]));  //, this));
             current->getNext()->setPrev(current);
             current = current->getNext();
-            it++;
         }
         output_layer = current;
         netDirectory = s;

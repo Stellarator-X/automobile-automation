@@ -1,5 +1,13 @@
 #include "ProcessLIB.h"
 #include "FH.h"
+/*
+* To do List:
+  1. Implement Reward Based Learning
+  2.
+*/
+
+
+
 //Calculus
     float phi(float x)//activation function
     {
@@ -74,9 +82,9 @@
         vector<float> Z;
         int size;
     public:
-        
+
         layer(int n);//, neural_net *N);//Constructor
-        
+
         layer* getNext(){
             return next;
         }
@@ -141,7 +149,7 @@
             current = current->getNext();
         }
         output_layer = current;
-        netDirectory = s;    
+        netDirectory = s;
     }
 
     layer* neural_net::getLayerNo(int x){
@@ -156,7 +164,7 @@
 
 
 //Layer - Function defs
-    layer::layer(int n){      //}, neural_net *N){            
+    layer::layer(int n){      //}, neural_net *N){
         size = n;
         for(int i=0;i<n;i++){
             neurons.push_back(neuron(n+1));
@@ -234,7 +242,7 @@
     float neuron::getZ(vector<float> input){
         inputStream = input;
         float result = bias;
-        
+
         for(int i=0;i<n_inputs;i++)
             result += weights[i]*input[i];
         z = result;
@@ -264,7 +272,7 @@
     void neural_net::calc_del(vector<float> input, vector<float> output){
         vector<float> pred_output;
         pred_output = getOutput(input);
-        
+
         //Need to initialise every input stream to each neuron => we need the neuron to store an input stream as well.
         //Can be done inside getOutput
         vector<float> del; //Del for the output layer(initially)
@@ -306,16 +314,16 @@
             inpset.push_back(dataset[i].first);
             outset.push_back(dataset[i].second);
         }
-        
+
         int setsize = inpset.size()/20;
         int maxit = 20*setsize;
-        
+
         auto starti = inpset.begin();
         auto endi = starti;
         std::advance(endi, setsize);
         vector<vector<float>> inpsubset;
         copy(starti, endi, back_inserter(inpsubset));
-        
+
         auto starto = outset.begin();
         auto endo = starto;
         std::advance(endo, setsize);
@@ -328,7 +336,7 @@
             std::advance(endi, setsize);
             starto = endo;
             std::advance(endo, setsize);
-            used+=setsize;  
+            used+=setsize;
         }
     }
 
@@ -337,9 +345,9 @@
         const int eta = 0.008;
 
         float Cost = getCost(inputs, outputs);
-        
+
         while((epochs--)&&(Cost>0.001)){ //Iterating throughout epochs or till Cost is reasonably minimised
-            
+
             vector < vector< float > >  DEL;
             vector < vector < vector< float > > > DCbDW;
             layer *curr = input_layer;
@@ -367,7 +375,7 @@
                 calc_del(inputs[i], outputs[i]);
                 //Filling the DEL Matrix
                 vector<vector<float>> newdel = getDel();
-                
+
                 //Filling the DCbDW matrix - incorrect approach - requires init to 0 first
                 layer *l = input_layer;
                 for(int i=0;i<newdel.size();i++, l = l->getNext()){
@@ -383,7 +391,7 @@
             DEL = matrix_divelts(DEL, inputs.size());
             DCbDW = TriMatrix_divelts(DCbDW, inputs.size());
 
-            
+
             //Correcting the weights
             layer *l = input_layer;
             for(int i=0;i<DCbDW.size();i++, l = l->getNext()){
@@ -396,7 +404,7 @@
 
         }
         //Now that weights have been corrected - We need to modify the file containing the weights - or in this case, create the file and add the weights
-        
+
         chdir(netDirectory.c_str());
         layer *lcur = input_layer;
         for(int i=0;i<depth;i++, lcur = lcur->getNext()){
@@ -405,7 +413,7 @@
                 n_weights.push_back(lcur->getNeurons()[j].getWeights());
             }
             string name = "Layer";
-            name+= (i+'0');    //Assuming depth <= 10 
+            name+= (i+'0');    //Assuming depth <= 10
             //name[6] = '\0';
             modify_csv_file(name, n_weights);
         }

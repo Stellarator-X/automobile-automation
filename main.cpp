@@ -11,8 +11,8 @@ using namespace std;
 
 #include "Objects.cpp"
 #include "perceptron2.cpp"
-#include "FH.h"
 #include "Network_Components.cpp"
+
 //Test for path following (Between Waypoints)
 int PathFollowing(){
     path rasta(10.0,100);
@@ -68,18 +68,6 @@ int dijkstr(){
     return 0;
 }
 
-int testNN(){
-	int n=3;
-	vector<int> lsizes;// = 3;
-	for(int i=0; i<n;i++)
-		lsizes.push_back(20*(i+1));
-	neural_net Brain(n, lsizes, "Net1");
-
-    layer *L = Brain.getInputLayer();
-    modify_csv_file("NE.csv", L->getWeightMatrix());
-	return 0;
-}
-
 int testla(){
     vector<int> d = {1, 2, 3, 4};
     vector<vector<int>> a = {d};
@@ -97,7 +85,27 @@ int testla(){
     return 0;
 }
 
+int testANN(){
+    int numL;
+    numL = 4;
+    vector<int> layersizes = {3, 4, 4, 3};
+    neural_net MyfirstBrain(numL, layersizes, "PehlaDimag");
+
+    vector<vector<float>> inpset = get2dvec("inputs.csv");
+    vector<vector<float>> outset = get2dvec("outputs.csv");
+
+   // MyfirstBrain.stoch_learn_from(inpset, outset);
+    //MyfirstBrain.setLearnedWeights();
+
+    cout << endl << "Final Cost = " << MyfirstBrain.getCost(inpset, outset) << endl;
+    return 0;
+}
+
 int main(){
-//    return testla(); 
-	return testNN();  
+    auto start = chrono::steady_clock::now();
+     testANN();
+    auto end = chrono::steady_clock::now();
+    auto diff = end - start;
+    cout << "\nNeural Network Created, \n DataSet analysed, and \n Weights Learned in " <<chrono::duration<double, milli> (diff).count() << "ms" << endl;
+    return 0;
 }

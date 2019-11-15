@@ -4,7 +4,7 @@
 #include <fstream>
 
 /*Actions we Need to perform
-    * Creating the file per layer, initialising with the random weights and bias
+    * Creating the file per layer, initilising with the random weights and bias
 */
 
 template<class T>

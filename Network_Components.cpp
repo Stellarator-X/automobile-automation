@@ -1,13 +1,5 @@
 #include "ProcessLIB.h"
 #include "FH.h"
-/*
-* To do List:
-  1. Implement Reward Based Learning
-  2.
-*/
-
-
-
 //Calculus
     float phi(float x)//activation function
     {
@@ -82,9 +74,9 @@
         vector<float> Z;
         int size;
     public:
-
+        
         layer(int n);//, neural_net *N);//Constructor
-
+        
         layer* getNext(){
             return next;
         }
@@ -132,10 +124,6 @@
         void learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs);
         float getCost(vector<vector<float>> inputs, vector<vector<float>> outputs);
 
-        layer* getInputLayer(){
-            return input_layer;
-        }
-
         void setLearnedWeights();//Virtual
 
     };
@@ -147,13 +135,13 @@
         int it = 0;//iterator through layerSizes
         input_layer = new layer(layerSizes[it++]);//, this);
         layer *current = input_layer;
-        while(it<n-1){
+        while(it<n){
             current->setNext(new layer(layerSizes[it++]));  //, this));
             current->getNext()->setPrev(current);
             current = current->getNext();
         }
         output_layer = current;
-        netDirectory = s;
+        netDirectory = s;    
     }
 
     layer* neural_net::getLayerNo(int x){
@@ -165,200 +153,13 @@
         return curr;
     }
 
-     vector<vector<float>> neural_net::getDel(){
-        vector<vector<float>> result;
-        layer *curr = input_layer;
-        while(curr!=NULL){
-            result.push_back(curr->returnDel());
-            curr= curr->getNext();
-        }
-        return result;
-    }
-
-    vector<float> neural_net::getOutput(vector<float> input){
-        layer *current = input_layer;
-        vector<float> buffer = input;
-        while(current!=output_layer){
-            buffer = current->getOutput(buffer);
-            current = current->getNext();
-        }
-        return output_layer->getOutput(buffer);
-    }
-
-    void neural_net::calc_del(vector<float> input, vector<float> output){
-        vector<float> pred_output;
-        pred_output = getOutput(input);
-
-        //Need to initialise every input stream to each neuron => we need the neuron to store an input stream as well.
-        //Can be done inside getOutput
-        vector<float> del; //Del for the output layer(initially)
-        del  = diff(pred_output,output); //ergo, we shall assume the cost func to be MS(~y - y)
-        del = matrixmult(convert_to_2d(del), convert_to_2d(output_layer->getZ(input)))[0];
-
-        layer *current = output_layer->getNext();
-        while(current!=input_layer){
-            del = current->getDel(del);
-            current->setNext(current);
-        }
-    }
-
-    float neural_net::getCost(vector<vector<float>> inputs, vector<vector<float>> outputs){
-        float result =0.0f;
-        for(auto const& i : combine(inputs, outputs)){
-            vector<float> input;
-            vector<float> output;
-            boost::tie(input, output) = i;
-            vector<float> predout = getOutput(input);
-            result+=MSE(predout, output);
-        }
-        result/=inputs.size();
-        return result;
-    }
-
-    void neural_net::stoch_learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs){//
-        //Using Stochastic Gradient Descent
-        vector<pair<vector<float>, vector<float>>> dataset;
-        for(int i=0;i<inputs.size();i++){
-            dataset.push_back(make_pair(inputs[i], outputs[i]));
-        }
-        static size_t used = 0;
-        if(!used);
-        FYShuffle(dataset.begin(), dataset.end());
-        vector<vector<float>> inpset;
-        vector<vector<float>> outset;
-        for(int i=0;i<inputs.size(); i++){
-            inpset.push_back(dataset[i].first);
-            outset.push_back(dataset[i].second);
-        }
-
-        int setsize = inpset.size()/20;
-        int maxit = 20*setsize;
-
-        auto starti = inpset.begin();
-        auto endi = starti;
-        std::advance(endi, setsize);
-        vector<vector<float>> inpsubset;
-        copy(starti, endi, back_inserter(inpsubset));
-
-        auto starto = outset.begin();
-        auto endo = starto;
-        std::advance(endo, setsize);
-        vector<vector<float>> outsubset;
-        copy(starto, endo, back_inserter(outsubset));
-
-        while(used<maxit){
-            learn_from(inpsubset, outsubset);
-            starti=endi;
-            std::advance(endi, setsize);
-            starto = endo;
-            std::advance(endo, setsize);
-            used+=setsize;
-        }
-    }
-
-    void neural_net::learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs){
-        int epochs = 300000;
-        const int eta = 0.008;
-
-        float Cost = getCost(inputs, outputs);
-
-        while((epochs--)&&(Cost>0.001)){ //Iterating throughout epochs or till Cost is reasonably minimised
-
-            vector < vector< float > >  DEL;
-            vector < vector < vector< float > > > DCbDW;
-            layer *curr = input_layer;
-            while(curr!=NULL){//Initialising all dels to zero first
-                vector<float> dell;
-                for(neuron n: curr->getNeurons()){
-                    dell.push_back(0.0f);
-                }
-                DEL.push_back(dell);
-                curr = curr->getNext();
-            }
-
-            //Initialising all cost derivatives to zero
-            layer* lcur = input_layer;
-            while(lcur!=NULL){
-                vector<vector<float>> v2;
-                for(int i=0;i<lcur->getNeurons().size();i++){
-                    vector<float> v1(lcur->getNeurons()[i].getInputs().size());
-                    v2.push_back(v1);
-                }
-                DCbDW.push_back(v2);
-            }
-
-            for(int i=0;i<inputs.size();i++){//Calculating the dels and iteratively adding to take an average later
-                calc_del(inputs[i], outputs[i]);
-                //Filling the DEL Matrix
-                vector<vector<float>> newdel = getDel();
-
-                //Filling the DCbDW matrix - incorrect approach - requires init to 0 first
-                layer *l = input_layer;
-                for(int i=0;i<newdel.size();i++, l = l->getNext()){
-                    for(int j=0;j<newdel[i].size();j++){
-                        for(int k=0;k<DCbDW[i][j].size();k++){
-                            DCbDW[i][j][k]+=(l->getNeurons()[j].getInputs()[k])*newdel[i][j];
-                        }
-                    }
-                }
-                DEL = matrix_add(DEL, newdel);
-
-            }
-            DEL = matrix_divelts(DEL, inputs.size());
-            DCbDW = TriMatrix_divelts(DCbDW, inputs.size());
-
-
-            //Correcting the weights
-            layer *l = input_layer;
-            for(int i=0;i<DCbDW.size();i++, l = l->getNext()){
-                for(int j=0;j<DCbDW[i].size();j++){
-                    for(int k=0;k<DCbDW[i][j].size();k++){
-                        l->getNeurons()[j].setWeight(k, l->getNeurons()[j].getWeights()[k] - eta*DCbDW[i][j][k]);
-                    }
-                }
-            }
-
-        }
-        //Now that weights have been corrected - We need to modify the file containing the weights - or in this case, create the file and add the weights
-
-        chdir(netDirectory.c_str());
-        layer *lcur = input_layer;
-        for(int i=0;i<depth;i++, lcur = lcur->getNext()){
-            vector<vector<float>> n_weights;
-            for(int j=0;j<lcur->getNeurons().size();j++){
-                n_weights.push_back(lcur->getNeurons()[j].getWeights());
-            }
-            string name = "Layer";
-            name+= (i+'0');    //Assuming depth <= 10
-            //name[6] = '\0';
-            modify_csv_file(name, n_weights);
-        }
-    }
-
-    void neural_net::setLearnedWeights(){
-        chdir(netDirectory.c_str());
-        string  fs = "Layer";
-        //Continuing assumption about network depth
-        layer *lcur = input_layer;
-        //int i, j, k;
-        int i=0;
-         while(lcur!=NULL){
-            vector<vector<float>> weightsofl;
-            weightsofl = get2dvec(fs+(char)('0'+i));
-            i++;
-            lcur->setWeights(weightsofl);
-            weightsofl.clear();
-        }
-    }
-
-
 
 
 //Layer - Function defs
-    layer::layer(int n){      //}, neural_net *N){
+    layer::layer(int n){      //}, neural_net *N){            
         size = n;
         for(int i=0;i<n;i++){
-            neurons.push_back(neuron(n+1));
+            neurons.push_back(neuron(****));
         }
      //   thisNetwork = N;
         next = NULL;
@@ -431,8 +232,12 @@
         return phi(getZ(input));
     }
     float neuron::getZ(vector<float> input){
+        cout << input.size() << ", " << n_inputs << endl;
+        assert(input.size()==n_inputs);
+        
         inputStream = input;
         float result = bias;
+
 
         for(int i=0;i<n_inputs;i++)
             result += weights[i]*input[i];
@@ -440,4 +245,188 @@
         return result;
     }
 
-   
+        vector<vector<float>> neural_net::getDel(){
+        vector<vector<float>> result;
+        layer *curr = input_layer;
+        while(curr!=NULL){
+            result.push_back(curr->returnDel());
+            curr= curr->getNext();
+        }
+        return result;
+    }
+
+    vector<float> neural_net::getOutput(vector<float> input){
+        layer *current = input_layer;
+        vector<float> buffer = input;
+        while(current!=output_layer){
+            buffer = current->getOutput(buffer);
+            current = current->getNext();
+        }
+        return output_layer->getOutput(buffer);
+    }
+
+    void neural_net::calc_del(vector<float> input, vector<float> output){
+        vector<float> pred_output;
+        pred_output = getOutput(input);
+        
+        //Need to initialise every input stream to each neuron => we need the neuron to store an input stream as well.
+        //Can be done inside getOutput
+        vector<float> del; //Del for the output layer(initially)
+        del  = diff(pred_output,output); //ergo, we shall assume the cost func to be MS(~y - y)
+        del = matrixmult(convert_to_2d(del), convert_to_2d(output_layer->getZ(input)))[0];
+
+        layer *current = output_layer->getNext();
+        while(current!=input_layer){
+            del = current->getDel(del);
+            current->setNext(current);
+        }
+    }
+
+    float neural_net::getCost(vector<vector<float>> inputs, vector<vector<float>> outputs){
+        float result =0.0f;
+        for(auto const& i : combine(inputs, outputs)){
+            vector<float> input;
+            vector<float> output;
+            boost::tie(input, output) = i;
+            vector<float> predout = getOutput(input);
+            result+=MSE(predout, output);
+        }
+        result/=inputs.size();
+        return result;
+    }
+
+    void neural_net::stoch_learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs){//
+        //Using Stochastic Gradient Descent
+        vector<pair<vector<float>, vector<float>>> dataset;
+        for(int i=0;i<inputs.size();i++){
+            dataset.push_back(make_pair(inputs[i], outputs[i]));
+        }
+        static size_t used = 0;
+        if(!used);
+        FYShuffle(dataset.begin(), dataset.end());
+        vector<vector<float>> inpset;
+        vector<vector<float>> outset;
+        for(int i=0;i<inputs.size(); i++){
+            inpset.push_back(dataset[i].first);
+            outset.push_back(dataset[i].second);
+        }
+        
+        int setsize = inpset.size()/20;
+        int maxit = 20*setsize;
+        
+        auto starti = inpset.begin();
+        auto endi = starti;
+        std::advance(endi, setsize);
+        vector<vector<float>> inpsubset;
+        copy(starti, endi, back_inserter(inpsubset));
+        
+        auto starto = outset.begin();
+        auto endo = starto;
+        std::advance(endo, setsize);
+        vector<vector<float>> outsubset;
+        copy(starto, endo, back_inserter(outsubset));
+
+        while(used<maxit){
+            learn_from(inpsubset, outsubset);
+            starti=endi;
+            std::advance(endi, setsize);
+            starto = endo;
+            std::advance(endo, setsize);
+            used+=setsize;  
+        }
+    }
+
+    void neural_net::learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs){
+        int epochs = 300000;
+        const int eta = 0.008;
+
+        float Cost = getCost(inputs, outputs);
+        
+        while((epochs--)&&(Cost>0.001)){ //Iterating throughout epochs or till Cost is reasonably minimised
+            
+            vector < vector< float > >  DEL;
+            vector < vector < vector< float > > > DCbDW;
+            layer *curr = input_layer;
+            while(curr!=NULL){//Initialising all dels to zero first
+                vector<float> dell;
+                for(neuron n: curr->getNeurons()){
+                    dell.push_back(0.0f);
+                }
+                DEL.push_back(dell);
+                curr = curr->getNext();
+            }
+
+            //Initialising all cost derivatives to zero
+            layer* lcur = input_layer;
+            while(lcur!=NULL){
+                vector<vector<float>> v2;
+                for(int i=0;i<lcur->getNeurons().size();i++){
+                    vector<float> v1(lcur->getNeurons()[i].getInputs().size());
+                    v2.push_back(v1);
+                }
+                DCbDW.push_back(v2);
+            }
+
+            for(int i=0;i<inputs.size();i++){//Calculating the dels and iteratively adding to take an average later
+                calc_del(inputs[i], outputs[i]);
+                //Filling the DEL Matrix
+                vector<vector<float>> newdel = getDel();
+                
+                //Filling the DCbDW matrix - incorrect approach - requires init to 0 first
+                layer *l = input_layer;
+                for(int i=0;i<newdel.size();i++, l = l->getNext()){
+                    for(int j=0;j<newdel[i].size();j++){
+                        for(int k=0;k<DCbDW[i][j].size();k++){
+                            DCbDW[i][j][k]+=(l->getNeurons()[j].getInputs()[k])*newdel[i][j];
+                        }
+                    }
+                }
+                DEL = matrix_add(DEL, newdel);
+
+            }
+            DEL = matrix_divelts(DEL, inputs.size());
+            DCbDW = TriMatrix_divelts(DCbDW, inputs.size());
+
+            
+            //Correcting the weights
+            layer *l = input_layer;
+            for(int i=0;i<DCbDW.size();i++, l = l->getNext()){
+                for(int j=0;j<DCbDW[i].size();j++){
+                    for(int k=0;k<DCbDW[i][j].size();k++){
+                        l->getNeurons()[j].setWeight(k, l->getNeurons()[j].getWeights()[k] - eta*DCbDW[i][j][k]);
+                    }
+                }
+            }
+
+        }
+        //Now that weights have been corrected - We need to modify the file containing the weights - or in this case, create the file and add the weights
+        
+        chdir(netDirectory.c_str());
+        layer *lcur = input_layer;
+        for(int i=0;i<depth;i++, lcur = lcur->getNext()){
+            vector<vector<float>> n_weights;
+            for(int j=0;j<lcur->getNeurons().size();j++){
+                n_weights.push_back(lcur->getNeurons()[j].getWeights());
+            }
+            string name = "Layer";
+            name+= (i+'0');    //Assuming depth <= 10 
+            //name[6] = '\0';
+            modify_csv_file(name, n_weights);
+        }
+    }
+
+    void neural_net::setLearnedWeights(){
+        chdir(netDirectory.c_str());
+        string  fs = "Layer";
+        //Continuing assumption about network depth
+        layer *lcur = input_layer;
+        //int i, j, k;
+        int i=0;
+         while(lcur!=NULL){
+            vector<vector<float>> weightsofl;
+            weightsofl = get2dvec(fs+(char)('0'+i));
+            i++;
+            lcur->setWeights(weightsofl);
+            weightsofl.clear();
+        }
+    }

@@ -17,10 +17,10 @@
 #include <ctype.h>
 #include <cmath>
 #include <bits/stdc++.h>
-#include "xtensor/xarray.hpp"
-#include "xtensor/xio.hpp"
-#include "xtensor/xview.hpp"
-#include "xtensor/xrandom.hpp"
+//#include "xtensor/xarray.hpp"
+//#include "xtensor/xio.hpp"
+//#include "xtensor/xview.hpp"
+//#include "xtensor/xrandom.hpp"
 
 #ifdef _MSC_VER
 #include <direct.h>
@@ -696,7 +696,7 @@ void Dijkstra::printsolution(){
         int n = a.size();
         vector<float> result;
         for(int i=0;i<n;i++){
-            result.push_back((a[i]-b[i]));
+            result.push_back(fabs(a[i]-b[i]));
         }
         return result;
     }
@@ -729,5 +729,14 @@ void Dijkstra::printsolution(){
     }
 
 
-
+vector<vector<>> onehot(int x, int siz){
+	vector<int> result;
+	for(int i=0;i<siz;i++){
+		if(i==x)
+			result.push_back(1);
+		else
+			result.push_back(0);
+		}
+	return result;
+}
 #endif

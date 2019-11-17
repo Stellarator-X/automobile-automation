@@ -1,6 +1,8 @@
 #include "ProcessLIB.h"
 #include "FH.h"
 //Calculus
+ 8888
+ //Maybe not for unfuzzy control
     float phi(float x)//activation function
     {
         return (1 + tanh(x))/2;
@@ -310,7 +312,7 @@
             }
             cout << "Del vec calculated\n";
             DEL = matrix_divelts(DEL, inputs.size());
-            DCbDW = TriMatrix_divelts(DCbDW, inputs.size());
+            ****DCbDW = TriMatrix_divelts(DCbDW, inputs.size());
             cout << "Cost derivatives calced.\n";    
             
             //Correcting the weights

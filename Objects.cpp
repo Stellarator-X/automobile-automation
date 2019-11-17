@@ -155,7 +155,12 @@ bool autonomous_vehicle::isInRange(obstacle obj){
 // # Ackermann Drive
 class AckermanV: public autonomous_vehicle
 {
-
+	//empty so far - controls depend on how the graphics work out
 };
 
 
+//Setting up a Dubin's path - given the current and the next two nodes
+//
+
+path setDubinsPath(pair<float, float> c1, pair<float, float> c1, pair<float, float> c1){
+	 

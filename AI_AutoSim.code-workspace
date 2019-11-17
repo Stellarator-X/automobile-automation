@@ -14,7 +14,8 @@
 			"string.h": "c",
 			"iostream": "cpp",
 			"iosfwd": "cpp",
-			"*.tcc": "cpp"
+			"*.tcc": "cpp",
+			"ostream": "cpp"
 		}
 	}
 }

@@ -546,8 +546,11 @@ void Dijkstra::printsolution(){
 
     template<class T>
     vector<vector<T>> matrixmult(vector<vector<T>> M, vector<vector<T>> N){
-        pair<int, int> cardM = make_pair(M.size(), M[0].size());
-        pair<int, int> cardN = make_pair(N.size(), N[0].size());
+        pair<int, int> cardM = make_pair(M.size(), (M.size()>0)?(M[0].size()):0);
+        pair<int, int> cardN = make_pair(N.size(), (N.size()>0)?N[0].size():0);
+        if(N.size()==0 || M.size()==0){
+            cout << "One of the two matrices is empty\n";
+        }
         assert(cardM.second==cardN.first);
         vector<vector<T>> result;
         for(int x=0;x<cardM.first;x++)
@@ -568,6 +571,7 @@ void Dijkstra::printsolution(){
     vector<vector<T>> matrixmult_hamadard(vector<vector<T>> M, vector<vector<T>> N){
         pair<int, int> cardM = make_pair(M.size(), M[0].size());
         pair<int, int> cardN = make_pair(N.size(), N[0].size());
+        cout << cardM.first <<", " << cardM.second <<" HX " << cardN.first <<", " << cardN.second << endl;
         assert(cardM==cardN);
         vector<vector<T>> result(cardM.first);
         for(int i=0;i<cardM.first;i++){
@@ -590,21 +594,47 @@ void Dijkstra::printsolution(){
         return result;
     }
     
+    template <class T>
+    vector<vector<T>> col_to_row(vector<vector<T>> vect){
+        assert(vect[0].size()==1);
+        vector<vector<T>> result;
+        vector<T> row;
+        for(int i=0;i<vect.size();i++){
+            row.push_back(vect[i][0]);
+        }
+        result.push_back(row);
+        return result;
+    }
+
     template<class T>
     vector<vector<T>> matrix_add(vector<vector<T>> A, vector<vector<T>> B){
         vector<vector<T>> result;
+        cout << "Adding "<< A.size() << "X"<<A[0].size() << " with " << B.size() << "X"<<B[0].size() << endl; 
         assert(A.size()==B.size());
         size_t n = A.size();
         for(size_t i=0;i<n;i++){
             assert(A[i].size()==B[i].size());
                 result.push_back(vector_add(A[i], B[i]));
         }
+        return result;
     }
 
     template<class T>
     vector<vector<T>> convert_to_2d(vector<T> vect){
         vector<vector<T>> result;
         result.push_back(vect);
+        return result;
+    }
+
+    template<class T>
+    vector<vector<T>> convert_to_2d_col(vector<T> vect){
+        vector<vector<T>> result;
+        for(int i=0;i<vect.size();i++){
+            vector<T> temp;
+            temp.push_back(vect[i]);
+            result.push_back(temp);
+            temp.clear();
+        }
         return result;
     }
 
@@ -666,7 +696,7 @@ void Dijkstra::printsolution(){
         int n = a.size();
         vector<float> result;
         for(int i=0;i<n;i++){
-            result.push_back(a[i]-b[i]);
+            result.push_back((a[i]-b[i]));
         }
         return result;
     }

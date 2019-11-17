@@ -93,11 +93,12 @@ int testANN(){
 
     vector<vector<float>> inpset = get2dvec("inputs.csv");
     vector<vector<float>> outset = get2dvec("outputs.csv");
+    vector<vector<float>> inp = inpset;
+    vector<vector<float>> Out = outset;
+   MyfirstBrain.stoch_learn_from(inpset, outset);
+//    MyfirstBrain.setLearnedWeights();
 
-   // MyfirstBrain.stoch_learn_from(inpset, outset);
-    //MyfirstBrain.setLearnedWeights();
-
-    cout << endl << "Final Cost = " << MyfirstBrain.getCost(inpset, outset) << endl;
+    cout << endl << "Final Cost = " << MyfirstBrain.getCost(inp, Out) << endl;
     return 0;
 }
 
@@ -107,5 +108,17 @@ int main(){
     auto end = chrono::steady_clock::now();
     auto diff = end - start;
     cout << "\nNeural Network Created, \n DataSet analysed, and \n Weights Learned in " <<chrono::duration<double, milli> (diff).count() << "ms" << endl;
+    return 0;
+}
+
+int mains(){
+
+    vector<int> a = {1, 2, 3, 34, 54, 6};
+    vector<vector<int>> b = convert_to_2d_col(a);
+    for(int i=0;i<b.size();i++){
+        for(int j=0;j<b[i].size();j++)
+            cout << b[i][j] << " ";
+        cout << endl;
+    }
     return 0;
 }

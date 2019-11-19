@@ -1,8 +1,6 @@
 #include "ProcessLIB.h"
 #include "FH.h"
 //Calculus
- 8888
- //Maybe not for unfuzzy control
     float phi(float x)//activation function
     {
         return (1 + tanh(x))/2;
@@ -100,7 +98,6 @@
         }
         vector<vector<float>> getWeightMatrix();
         void setPrev(layer *n){
-        //    cout << "Previous size set as " << n->getSize() << endl;
             prev=n;
         }
         int getSize(){
@@ -112,6 +109,7 @@
         void setWeights(vector<vector<float>> ww);
     };
 //Network - Virtual
+
     class neural_net{
         layer *input_layer;
         layer *output_layer;
@@ -253,15 +251,14 @@
 
     void neural_net::learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs){
         int epochs = 3000;
-        static float eta = 0.1;
-        eta+=0.1;
+        static float eta = 0.4;
+        eta += 0.02;
 
         float Cost = getCost(inputs, outputs);
-        cout << "The Starting Cost is "<< Cost << endl;
-        // char c = getchar();
         int iteration=0;
         while((epochs--)&&(Cost>0.001)){ //Iterating throughout epochs or till Cost is reasonably minimised
-            cout << "Cost in epoch " << iteration++ << " is " << Cost << endl;     
+          //  cout << "Cost in epoch " << iteration++ << " is " << Cost << endl;    
+            cout <<">"; 
             vector < vector< float > >  DEL;
             vector < vector < vector< float > > > DCbDW;
             layer *curr = input_layer;
@@ -276,7 +273,7 @@
                 curr = curr->getNext();
                 i++;
             }
-            cout << "Dels init to 0, with size* "<< DEL.size() <<"\n";
+            
             //Initialising all cost derivatives to zero
             layer* lcur = input_layer;
             while(lcur!=NULL){
@@ -287,11 +284,11 @@
                 }
                 DCbDW.push_back(v2);
                 lcur = lcur->getNext();
-               // cout << "Cost deriv init to 0\n";
+               
             }
-            cout << "Cost deriv init to 0\n";
+            
             for(int i=0;i<inputs.size();i++){//Calculating the dels and iteratively adding to take an average later
-                cout << "Calculating del for input set " << i << endl;
+                
                 calc_del(inputs[i], outputs[i]);
                 //Filling the DEL Matrix
                 vector<vector<float>> newdel = getDel();
@@ -299,7 +296,7 @@
                 //Filling the DCbDW matrix - incorrect approach - requires init to 0 first
                 layer *l = input_layer;
                 for(int i=0;i<newdel.size();i++, l = l->getNext()){
-                    cout << "Setting delcost for layer " << i << endl;
+                    
                     for(int j=0;j<newdel[i].size();j++){
                         for(int k=0;k<DCbDW[i][j].size();k++){
                             DCbDW[i][j][k]+=((*(l->getNeurons()))[j].getInputs()[k])*newdel[i][j];
@@ -307,30 +304,28 @@
                     }
                 }
                 vector<vector<float>> temp = matrix_add(DEL, newdel);
-                //DEL.clear();
+                
                 DEL = temp;
             }
-            cout << "Del vec calculated\n";
+            
             DEL = matrix_divelts(DEL, inputs.size());
-            ****DCbDW = TriMatrix_divelts(DCbDW, inputs.size());
-            cout << "Cost derivatives calced.\n";    
+            DCbDW = TriMatrix_divelts(DCbDW, inputs.size());
+          //  cout << "\b";   
             
             //Correcting the weights
             layer *l = input_layer;
             for(int i=0;i<DCbDW.size();i++, l = l->getNext()){
                 for(int j=0;j<DCbDW[i].size();j++){
                     for(int k=0;k<DCbDW[i][j].size();k++){
-                        cout << "Going to perform " << ((*(l->getNeurons()))[j].getWeights()[k]) <<"<-" <<((*(l->getNeurons()))[j].getWeights()[k])<<"-"<<eta<<"X"<<(DCbDW[i][j][k]) << endl;
                         (*(l->getNeurons()))[j].setWeight(k, (*(l->getNeurons()))[j].getWeights()[k] - eta*DCbDW[i][j][k]*1000000);
-                        cout << "New wt = " << (*(l->getNeurons()))[j].getWeights()[k] << endl;
                     }
                 }
             }
-            cout << "Weights Set\n";
 
             Cost = getCost(inputs, outputs);
         }
-        cout << "Final Cost = " << Cost;
+        cout << "Final Cost = " << Cost << endl;
+        
         //Now that weights have been corrected - We need to modify the file containing the weights - or in this case, create the file and add the weights
         
         chdir(netDirectory.c_str());
@@ -356,10 +351,13 @@
         int i=0;
          while(lcur!=NULL){
             vector<vector<float>> weightsofl;
-            weightsofl = get2dvec(fs+(char)('0'+i));
+            string tempfile = fs + (char)('0'+i);
+            weightsofl = get2dvec(tempfile);
             i++;
             lcur->setWeights(weightsofl);
             weightsofl.clear();
+            cout << "Got one layer \n";
+            lcur = lcur->getNext();
         }
     }
 
@@ -368,15 +366,10 @@
 //Layer - Function defs
     layer::layer(int n, layer *p){      //}, neural_net *N){            
         size = n;
-        cout << "Size of this layer = " << n << endl;
-         prev = p;
-        if(prev!=NULL)
-            cout << "Input Size for each neuron of this layer = " << prev->getSize() << endl;
-        if(prev!=NULL)
-            cout << "The input size is - " << this->getPrev()->getSize() << endl;
+        
+        prev = p;
         for(int i=0;i<n;i++){
             if(this->getPrev()!=NULL){
-                cout << "Ye to sahi hai" << endl;
                 neurons.push_back(neuron(prev->getSize()));
             
             }
@@ -385,12 +378,8 @@
                 neurons.push_back(neuron(n));
             }
         }
-     //   thisNetwork = N;
+
         next = NULL;
-    //     prev = p;
-    //     if(prev!=NULL)
-    //         cout << "Input Size for each neuron of this layer = " << prev->getSize() << endl;
-    //    // thisNetwork = N;
     }
 
     void layer::setWeights(vector<vector<float>> ww){
@@ -416,7 +405,7 @@
     vector<float> layer::getDel(vector<float> delnxt){
         assert(this->getNext()!=NULL);
         vector<vector<float>> result;
-        cout << "Size of delnext is - "  << delnxt.size() << endl;
+        
         vector<vector<float>> dellp1 = convert_to_2d_col(delnxt);
         vector<vector<float>> wlp1T = Transpose(next->getWeightMatrix());
         vector<vector<float>> dphi = convert_to_2d(d_phi(giveZ()));
@@ -441,7 +430,6 @@
 
     vector<float> layer::getZ(vector<float> input){
         vector<float> result;
-        cout << "Size of this layer  = " << size << endl;
         for(int i=0;i<size;i++)
             result.push_back(neurons[i].getZ(input));
         Z = result;
@@ -453,11 +441,10 @@
         static int neurnum = 0;
         ind = neurnum++;
         n_inputs = n;
-        cout << "Number of Inputs set as  - " << n_inputs << endl;
         for(int i=0;i<n;i++)
             weights.push_back((rand()%5+0.4)/(rand()%3+0.6));
         bias = rand()%2+0.4;
-        //thisLayer = l;
+
     }
 
     float neuron::getOutput(vector<float> input){
@@ -465,7 +452,6 @@
     }
     float neuron::getZ(vector<float> input){
         
-        cout << ind <<"th neuron - "<<input.size() << ", " << n_inputs << endl;
         assert(input.size()==n_inputs);
         
         inputStream = input;

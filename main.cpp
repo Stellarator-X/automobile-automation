@@ -93,12 +93,22 @@ int testANN(){
 
     vector<vector<float>> inpset = get2dvec("inputs.csv");
     vector<vector<float>> outset = get2dvec("outputs.csv");
-    vector<vector<float>> inp = inpset;
-    vector<vector<float>> Out = outset;
-   MyfirstBrain.stoch_learn_from(inpset, outset);
-//    MyfirstBrain.setLearnedWeights();
+    inpset.pop_back();
+    outset.pop_back();
+    MyfirstBrain.setLearnedWeights();
 
-    cout << endl << "Final Cost = " << MyfirstBrain.getCost(inp, Out) << endl;
+    cout << "Init Cost = " << MyfirstBrain.getCost(inpset, outset);
+    char c = getchar();
+    MyfirstBrain.stoch_learn_from(inpset, outset);
+    cout << "Final Cost  = " << MyfirstBrain.getCost(inpset, outset);
+    cout << "\nCalculating the Output for the entered inpset - \n";
+    int ch = getchar();
+  
+    vector<float> inp = {1, 0, 1};
+    vector<float> out =  MyfirstBrain.getOutput(inp);
+    for(int i=0;i<3;i++){
+        cout << out[i] << endl;
+    }
     return 0;
 }
 

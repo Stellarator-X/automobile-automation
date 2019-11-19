@@ -17,10 +17,10 @@
 #include <ctype.h>
 #include <cmath>
 #include <bits/stdc++.h>
-//#include "xtensor/xarray.hpp"
-//#include "xtensor/xio.hpp"
-//#include "xtensor/xview.hpp"
-//#include "xtensor/xrandom.hpp"
+#include "xtensor/xarray.hpp"
+#include "xtensor/xio.hpp"
+#include "xtensor/xview.hpp"
+#include "xtensor/xrandom.hpp"
 
 #ifdef _MSC_VER
 #include <direct.h>
@@ -571,7 +571,7 @@ void Dijkstra::printsolution(){
     vector<vector<T>> matrixmult_hamadard(vector<vector<T>> M, vector<vector<T>> N){
         pair<int, int> cardM = make_pair(M.size(), M[0].size());
         pair<int, int> cardN = make_pair(N.size(), N[0].size());
-        cout << cardM.first <<", " << cardM.second <<" HX " << cardN.first <<", " << cardN.second << endl;
+      //  cout << cardM.first <<", " << cardM.second <<" HX " << cardN.first <<", " << cardN.second << endl;
         assert(cardM==cardN);
         vector<vector<T>> result(cardM.first);
         for(int i=0;i<cardM.first;i++){
@@ -609,7 +609,7 @@ void Dijkstra::printsolution(){
     template<class T>
     vector<vector<T>> matrix_add(vector<vector<T>> A, vector<vector<T>> B){
         vector<vector<T>> result;
-        cout << "Adding "<< A.size() << "X"<<A[0].size() << " with " << B.size() << "X"<<B[0].size() << endl; 
+        //cout << "Adding "<< A.size() << "X"<<A[0].size() << " with " << B.size() << "X"<<B[0].size() << endl; 
         assert(A.size()==B.size());
         size_t n = A.size();
         for(size_t i=0;i<n;i++){
@@ -696,7 +696,7 @@ void Dijkstra::printsolution(){
         int n = a.size();
         vector<float> result;
         for(int i=0;i<n;i++){
-            result.push_back(fabs(a[i]-b[i]));
+            result.push_back((a[i]-b[i]));
         }
         return result;
     }
@@ -729,14 +729,5 @@ void Dijkstra::printsolution(){
     }
 
 
-vector<vector<>> onehot(int x, int siz){
-	vector<int> result;
-	for(int i=0;i<siz;i++){
-		if(i==x)
-			result.push_back(1);
-		else
-			result.push_back(0);
-		}
-	return result;
-}
+
 #endif

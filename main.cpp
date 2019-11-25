@@ -88,14 +88,14 @@ int testla(){
 int testANN(){
     int numL;
     numL = 4;
-    vector<int> layersizes = {3, 4, 4, 3};
-    neural_net MyfirstBrain(numL, layersizes, "PehlaDimag");
+    vector<int> layersizes = {3, 40, 40, 3};
+    neural_net MyfirstBrain(numL, layersizes, "AnotherBrain", 0.08);
 
     vector<vector<float>> inpset = get2dvec("inputs.csv");
     vector<vector<float>> outset = get2dvec("outputs.csv");
     inpset.pop_back();
     outset.pop_back();
-    MyfirstBrain.setLearnedWeights();
+    //MyfirstBrain.setLearnedWeights();
 
     cout << "Init Cost = " << MyfirstBrain.getCost(inpset, outset);
     char c = getchar();

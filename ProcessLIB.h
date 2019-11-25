@@ -7,14 +7,15 @@
 //#include "xtensor"
 #include <cstring>
 #include <boost/range/combine.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <set>
 #include <stdlib.h>
 #include <stdio.h>
-#include <limits.h>//USE?
+#include <limits.h>//USE - to get INT_MAX etc
 #include <chrono>
 #include <cstring>
+#include <tuple>
 #include <ctype.h>
+#include <queue>
 #include <cmath>
 #include <bits/stdc++.h>
 #include "xtensor/xarray.hpp"
@@ -176,6 +177,10 @@ public:
         a.mult(n);
         return a;
     }
+
+    float modulus(){
+        return pow(x*x + y*y + z*z , 0.5);
+    }
    //return the product with a scalar
     static PVector mult(PVector v, float n, PVector target = PVector(0, 0)){
         target.set(n*v.getx(), n*v.gety(), n*v.getz());
@@ -321,9 +326,9 @@ public:
  
   /**
    * Calculate the angle between two vectors, using the dot product 
-   * @param v1 a vector 
-   * @param v2 another vector 
-   * @return the angle between the vectors 
+   * param v1 a vector 
+   * param v2 another vector 
+   * return the angle between the vectors 
    */ 
     static float angleBetween(PVector v1, PVector v2) { 
         double dot = v1.getx() * v2.getx() + v1.gety() * v2.gety() + v1.getz() * v2.getz(); 
@@ -364,6 +369,9 @@ public :
     BasisVector(){}
     BasisVector(PVector fwd, PVector Up);
      void update(PVector fwd);
+    PVector getFwd(){
+        return forward;
+    }
 };
 
 BasisVector::BasisVector(PVector fwd, PVector Up){
@@ -726,8 +734,115 @@ void Dijkstra::printsolution(){
 		--left;
 	}
 	return begin;
+    }   
+
+    int HCF(int a, int b){
+        int max = min(a, b);
+        int res = 1;
+        for(int i=1;i<=max; i++){
+            if(!(a%i) && !(b%i))
+                res=i;
+        }
+        return res;
+    }
+
+    int lcm(int a, int b){
+        return a*b/HCF(a, b);
+    }
+
+    int LCM (vector<int> A){
+        int lc = 1;
+        for(int i : A){
+            lc = lcm(lc, i);
+        }
+        return lc;
+    }
+
+    template<class T>
+    vector<double> linDiscretise(T Lbound, T Ubound, int n){
+        vector<double> result;
+        double l = static_cast<double>(Lbound);
+        double u = static_cast<double>(Ubound);
+
+        switch(n){
+            case 0:
+                return result;
+            case 1:
+                result.push_back(l);
+                return result;
+            default:
+                {
+                    double size = (l-u)/n;
+                    for(int i=0;i<n-1;i++){
+                        result.push_back(l + size*i);
+                    }
+                    result.push_back(u);
+
+                    return result;
+                }
+        }
+    }
+
+    template<class T>
+    int Digitize(T val, vector<double> Dvec, bool right  = false)//Assuming that discretisation is monotonic
+    {
+        double v = static_cast<double>(val);
+        if(val<Dvec[0])
+            return 0;
+        for(int i=1;i<Dvec.size()-1;i++){
+            if( v>=Dvec[i]-1 && v<Dvec[i+1])
+                return i;
+        }
+        return Dvec.size()-1;
+    }
+
+    template<class T, class t>
+    auto argmax(vector<T> values, vector<t> space){
+        T max = values[0];
+        int pos = 0;
+        for(int i=1;i<values.size();i++){
+            if(max<values[i]){
+                max = values[i];
+                pos = i;
+            }
+        }
+        return space[pos];
+    }
+
+    template<class T>
+    vector<vector<double>> Box(vector<T> minV, vector<T> maxV, double precision){
+        //Returns the vector of all possible vectors between the two given vectors
+        vector<vector<double>> result;
+
+        assert(minV.size()==maxV.size());
+        vector<int> sizes;
+        for(int i=0;i<minV.size();i++){
+            sizes.push_back(static_cast<int>((maxV[i]-minV[i])/precision));
+        }
+
+        int _size = LCM(sizes);
+
+
+        for(int i=0;i<_size;i++){
+            vector<double> temp;
+
+            for(int j=0;j<sizes.size();j++){
+                temp.push_back(minV[j]+precision*(i%sizes[j]));
+            }
+
+            result.push_back(temp);
+        }
+        
+        return result;
     }
 
 
-
+    float random_random(int precision)//Returns a random float in [0, 1)
+    {
+        // @ params - precision - no of precise digits in the float returned.
+        float result;
+        int num = random()%(int)(pow(10, precision));
+        result = static_cast<float>(num)/pow(10, precision);
+        return result;
+    }
 #endif

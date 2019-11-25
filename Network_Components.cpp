@@ -30,6 +30,7 @@
 
 
 
+
 //Neuron  - Virtual
     class neuron{
         int n_inputs;
@@ -113,12 +114,12 @@
     class neural_net{
         layer *input_layer;
         layer *output_layer;
-        vector<vector<float>> del;//2D as everyu neuron has a unique del
-
+        vector<vector<float>> del;//2D as every neuron has a unique del
+        float eta;//Learning Rate
         string netDirectory;
         int depth;
     public:
-        neural_net(int n, vector<int> layerSizes, string s);//Constructor with layer-depth
+        neural_net(int n, vector<int> layerSizes, string s, float lr);//Constructor with layer-depth
 
         vector<float> getOutput(vector<float> input);
         void calc_del(vector<float> input, vector<float> output);
@@ -128,12 +129,16 @@
         void learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs);
         float getCost(vector<vector<float>> inputs, vector<vector<float>> outputs);
 
-        void setLearnedWeights();//Virtual
+        void setLearnedWeights();
+
+        void Q_Update();//Virtual
 
     };
 
 //Network - Function defs
-    neural_net::neural_net(int n, vector<int> layerSizes, string s){//n-> no of layers, layerSizes
+    neural_net::neural_net(int n, vector<int> layerSizes, string s, float lr){
+        //n-> no of layers, layerSizes
+        eta = lr;
         depth = n;
         assert(n>=1);
         int it = 0;//iterator through layerSizes
@@ -250,14 +255,15 @@
     }
 
     void neural_net::learn_from(vector<vector<float>> inputs, vector<vector<float>> outputs){
-        int epochs = 3000;
-        static float eta = 0.4;
-        eta += 0.02;
+        int epochs = 30000;
+        static float eta_used = eta;
+        //eta += 0.02;
 
         float Cost = getCost(inputs, outputs);
         int iteration=0;
         while((epochs--)&&(Cost>0.001)){ //Iterating throughout epochs or till Cost is reasonably minimised
-          //  cout << "Cost in epoch " << iteration++ << " is " << Cost << endl;    
+            if(iteration%1000==0)
+                cout << "Cost in epoch " << iteration++ << " is " << Cost << endl;    
             cout <<">"; 
             vector < vector< float > >  DEL;
             vector < vector < vector< float > > > DCbDW;

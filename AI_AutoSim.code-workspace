@@ -15,7 +15,11 @@
 			"iostream": "cpp",
 			"iosfwd": "cpp",
 			"*.tcc": "cpp",
-			"ostream": "cpp"
+			"ostream": "cpp",
+			"bitset": "cpp",
+			"random": "cpp",
+			"future": "cpp",
+			"optional": "cpp"
 		}
 	}
 }

@@ -45,10 +45,16 @@ public:
     PVector getvelocity(){
         return velocity;
     }
+    PVector getorientation(){
+        return orientation;
+    }
     void setVelocity(PVector v){
         velocity = v;
     }
     void applyForce(PVector force);
+    PVector getLocation(){
+        return position;
+    }
     //void seek(PVector target);
     //void arrive(PVector target, float rad);
     pair<float, float> display();
@@ -60,7 +66,7 @@ vehicle::vehicle(float x, float y){
     position  = PVector(x, y);
     acceleration  = PVector(0,0);
     velocity = PVector(0,0);
-    orientation = BasisVector(PVector(1, 0, 0), PVector(0, 1, 0));
+    orientation = BasisVector(PVector(1, 0, 0), PVector(0, 0, 1));
     r=6;
     speed = maxspeed = 5;
     maxforce = 0.3;

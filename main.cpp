@@ -9,11 +9,10 @@
 #include <cassert>
 using namespace std;
 
-#include "Objects.cpp"
-#include "perceptron2.cpp"
-#include "LearnCarEnv.cpp"
-#include "CarEnv.cpp"
-#include "Network_Components.cpp"
+#include "utils/Objects.cpp"
+#include "utils/LearnCarEnv.cpp"
+#include "utils/CarEnv.cpp"
+#include "utils/Network_Components.cpp"
 
 //Test for path following (Between Waypoints)
 int TargetSeeking(){
